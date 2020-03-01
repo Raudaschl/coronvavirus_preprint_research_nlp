@@ -1,10 +1,10 @@
-# Coronvavirus (COVID-19) Academic Preprint Topic Modelling
+# Coronavirus (COVID-19) Academic Preprint Topic Modelling
 
 This script does topic modelling on the latest academic pre-prints on coronavirus to see if there were any unusual patterns. Its a total experiment and I have written an article summarising the things I thought were interesting.
 
 
 ### Stopwords Library
-Coronaviris data collected from the results section of each preprint listed in the Elsevier Novel Coronavirus Information Center accessed on March 1st 2020 - https://www.elsevier.com/connect/coronavirus-information-center
+Coronavirus data collected from the results section of each pre-print listed in the Elsevier Novel Coronavirus Information Center accessed on March 1st 2020 - https://www.elsevier.com/connect/coronavirus-information-center
 
 ### Stopwords Library
 We will need the stopwords from NLTK and spacy’s en model for text pre-processing. Later, we will be using the spacy model for lemmatization.
@@ -15,7 +15,7 @@ import nltk; nltk.download('stopwords')
 python3 -m spacy download en
 
 ### NLP Libraries
-This script requires a bunch of NLP libraries which i'm sure you will be able to download.
+This script requires a bunch of NLP libraries which I'm sure you will be able to download.
 
 ### Mallet Download
 You will also need to download Mallet, unzip and point to that folder directory in the python script:
