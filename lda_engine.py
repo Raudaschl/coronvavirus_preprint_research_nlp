@@ -78,11 +78,28 @@ def compute_coherence_values(dictionary, corpus, texts, limit, start=2, step=3):
 
 
 
+def testMallet2Model(self):
+    if not self.mallet_path:
+        return
 
+    tm1 = ldamallet.LdaMallet(self.mallet_path, corpus=corpus, num_topics=2, id2word=dictionary)
+    tm2 = ldamallet.malletmodel2ldamodel(tm1)
+    for document in corpus:
+        element1_1, element1_2 = tm1[document][0]
+        element2_1, element2_2 = tm2[document][0]
+        self.assertAlmostEqual(element1_1, element2_1)
+        self.assertAlmostEqual(element1_2, element2_2, 1)
+        element1_1, element1_2 = tm1[document][1]
+        element2_1, element2_2 = tm2[document][1]
+        self.assertAlmostEqual(element1_1, element2_1)
+        self.assertAlmostEqual(element1_2, element2_2, 1)
+        logging.debug('%d %d', element1_1, element2_1)
+        logging.debug('%d %d', element1_2, element2_2)
+        logging.debug('%d %d', tm1[document][1], tm2[document][1])
 
 
 # Import Dataset
-csvFile = 'coronavirus_research.csv'
+csvFile = 'data_out.csv'
 df = pd.read_csv(csvFile)
 
 # print(df.target_names.unique())
@@ -169,6 +186,8 @@ print(corpus[:1])
 #     per_word_topics=True)
 
 
+
+
 # # Print the Keyword in the 10 topics
 # pprint(lda_model.print_topics())
 # doc_lda = lda_model[corpus]
@@ -176,13 +195,21 @@ print(corpus[:1])
 # Mallet topic model
 # Download File: http://mallet.cs.umass.edu/dist/mallet-2.0.8.zip
 mallet_path = '../mallet-2.0.8/bin/mallet' # update this path
-ldamallet = gensim.models.wrappers.LdaMallet(mallet_path, corpus=corpus, num_topics=32, id2word=id2word)
+ldamallet = gensim.models.wrappers.LdaMallet(mallet_path, corpus=corpus, num_topics=75, id2word=id2word)
 
 optimal_model = ldamallet
-lda_model = optimal_model
-# Show Topics
-model_topics = ldamallet.show_topics(formatted=False)
-pprint(ldamallet.print_topics(num_words=10))
+
+
+
+# # Visualize the topics
+# lda_model = gensim.models.wrappers.ldamallet.malletmodel2ldamodel(optimal_model)
+# vis = pyLDAvis.gensim.prepare(lda_model, corpus, id2word)
+# pyLDAvis.save_html(vis, 'output_filename.html')
+
+
+# # Show Topics
+# model_topics = ldamallet.show_topics(formatted=False)
+# pprint(ldamallet.print_topics(num_words=10))
 
 
 # # Compute Coherence Score
@@ -191,29 +218,39 @@ pprint(ldamallet.print_topics(num_words=10))
 # print('\nCoherence Score: ', coherence_ldamallet)
 
 
+
 # # Can take a long time to run.
-# model_list, coherence_values = compute_coherence_values(dictionary=id2word, corpus=corpus, texts=data_lemmatized, start=2, limit=40, step=6)
+# model_list, coherence_values = compute_coherence_values(dictionary=id2word, corpus=corpus, texts=data_lemmatized, start=20, limit=105, step=5)
 
 
-# # Show graph
-# limit=40; start=2; step=6;
+# start=20; limit=105; step=5;
 # x = range(start, limit, step)
 
 # # Print the coherence scores
 # for m, cv in zip(x, coherence_values):
 #     print("Num Topics =", m, " has Coherence Value of", round(cv, 4))
 
-##32 topics seems optimal here - adrian 2020 feb
+# # Show graph
+# plt.plot(x, coherence_values)
+# plt.xlabel("Num Topics")
+# plt.ylabel("Coherence score")
+# plt.legend(("coherence_values"), loc='best')
+# plt.show()
 
-def format_topics_sentences(ldamodel=lda_model, corpus=corpus, texts=data):
+##32 topics seems optimal here - adrian 2020 feb
+##75 topics seems optimal here - adrian 2020 feb
+
+def format_topics_sentences(ldamodel=optimal_model, corpus=corpus, texts=data):
     # Init output
     sent_topics_df = pd.DataFrame()
 
     # Get main topic in each document
     for i, row in enumerate(ldamodel[corpus]):
         row = sorted(row, key=lambda x: (x[1]), reverse=True)
+        
         # Get the Dominant topic, Perc Contribution and Keywords for each document
         for j, (topic_num, prop_topic) in enumerate(row):
+
             if j == 0:  # => dominant topic
                 wp = ldamodel.show_topic(topic_num)
                 topic_keywords = ", ".join([word for word, prop in wp])
@@ -236,7 +273,7 @@ df_dominant_topic.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contri
 # Show
 print("Dominant topic in each sentence")
 pprint(df_dominant_topic.head(10))
-
+df_dominant_topic.to_csv("sentence_for_topic.csv", index=False)
 
 
 # Group top 5 sentences under each topic
